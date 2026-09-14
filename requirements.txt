@@ -1,0 +1,5 @@
+# Core Python dependencies for the project prototype
+
+numpy
+matplotlib
+pytest

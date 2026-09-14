@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drone Smart Path — Autonomous Swarm Mission Control</title>
+  <meta name="description" content="Interactive 2D/3D Visual Mission Runner & Swarm Dashboard for Autonomous Multi-UAV Resilience and Path Planning.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Global Header -->
+    <header class="top-nav">
+      <div class="brand-group">
+        <div class="radar-logo">
+          <div class="radar-sweep"></div>
+          <div class="radar-dot"></div>
+        </div>
+        <div class="brand-text">
+          <h1>RESCUEPILOT <span class="badge-strands">STRANDS AI AGENT</span></h1>
+          <span class="sub-badge">AUTONOMOUS SEARCH-AND-RESCUE SWARM COMMANDER</span>
+        </div>
+      </div>
+
+      <div class="header-status-strip">
+        <div class="status-chip active" id="chip-agent-state">
+          <span class="pulse-dot-agent"></span>
+          <span id="txt-agent-status">COMMANDER: READY</span>
+        </div>
+        <div class="status-chip active" id="chip-mission-state">
+          <span class="pulse-dot"></span>
+          <span id="txt-mission-status">ACTIVE MISSION</span>
+        </div>
+        <div class="status-chip" id="chip-formation-state">
+          <span class="chip-label">FORMATION:</span>
+          <span class="chip-val" id="txt-formation-type">WEDGE (AUTO)</span>
+        </div>
+        <div class="status-chip" id="chip-weather-state">
+          <span class="chip-label">WEATHER:</span>
+          <span class="chip-val" id="txt-weather-summary">WIND 4.5 m/s</span>
+        </div>
+        <div class="status-chip" id="chip-time">
+          <span class="chip-label">T+</span>
+          <span class="chip-val font-mono" id="txt-mission-time">00:00.0</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-open-sitrep" class="btn btn-warning" title="View Full Military Situation Report (SITREP)">
+          <span class="icon">📜</span> SITREP
+        </button>
+        <button id="btn-toggle-play" class="btn btn-primary" title="Play / Pause Simulation">
+          <span class="icon" id="icon-play-pause">⏸</span> <span id="lbl-play-pause">PAUSE</span>
+        </button>
+        <button id="btn-step" class="btn btn-secondary" title="Advance Single Step">
+          <span class="icon">⏭</span> STEP
+        </button>
+        <button id="btn-reset" class="btn btn-secondary" title="Reset Scenario">
+          <span class="icon">🔄</span> RESET
+        </button>
+        <button id="btn-view-toggle" class="btn btn-accent" title="Toggle 2D / 3D Isometric View">
+          <span class="icon">🌐</span> <span id="lbl-view-mode">3D VIEW</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <main class="main-layout">
+      <!-- Left Sidebar: Swarm Fleet Telemetry -->
+      <aside class="sidebar telemetry-sidebar">
+        <div class="panel-header">
+          <h2>SWARM TELEMETRY</h2>
+          <span class="badge" id="badge-drone-count">4 UNITS</span>
+        </div>
+
+        <!-- Global Fleet Metrics Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-title">AREA COVERED</span>
+            <div class="metric-value-row">
+              <span class="metric-number" id="val-coverage">0.0</span>
+              <span class="metric-unit">%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="bar-coverage" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-title">FLIGHT DISTANCE</span>
+            <div class="metric-value-row">
+              <span class="metric-number" id="val-distance">0.0</span>
+              <span class="metric-unit">m</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-title">COLLISION RISK</span>
+            <div class="metric-value-row text-success">
+              <span class="metric-number" id="val-collisions">0.0</span>
+              <span class="metric-unit">SAFE</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-title">SWARM SPACING</span>
+            <div class="metric-value-row">
+              <span class="metric-number" id="val-spacing">6.0</span>
+              <span class="metric-unit">m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Individual Drone Status Cards List -->
+        <div class="panel-section-title">ACTIVE UAVs</div>
+        <div class="drone-card-list" id="drone-card-list">
+          <!-- Dynamically Populated by app.js -->
+        </div>
+      </aside>
+
+      <!-- Center Stage: Tactical Map Canvas -->
+      <section class="canvas-viewport">
+        <!-- Floating Canvas Overlays -->
+        <div class="canvas-overlay-top">
+          <div class="compass-rose">
+            <div class="compass-needle" id="compass-needle"></div>
+            <span class="compass-n">N</span>
+          </div>
+          <div class="scenario-selector-bar">
+            <span class="overlay-label">SCENARIO:</span>
+            <select id="sel-scenario" class="select-dropdown">
+              <option value="search_and_rescue">Search & Rescue (SAR)</option>
+              <option value="obstacle_course">Dense Obstacle Course</option>
+              <option value="storm_resilience">High Wind & Storm Resilience</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="canvas-overlay-bottom">
+          <div class="legend-bar">
+            <span class="legend-item"><span class="legend-dot dot-lead"></span> Lead UAV</span>
+            <span class="legend-item"><span class="legend-dot dot-wing"></span> Wing UAV</span>
+            <span class="legend-item"><span class="legend-dot dot-target"></span> SAR Target</span>
+            <span class="legend-item"><span class="legend-dot dot-obstacle"></span> Obstacle</span>
+            <span class="legend-item"><span class="legend-dot dot-nogozone"></span> No-Go Zone</span>
+          </div>
+          <div class="canvas-tools">
+            <button id="btn-zoom-in" class="btn-icon" title="Zoom In">+</button>
+            <button id="btn-zoom-out" class="btn-icon" title="Zoom Out">-</button>
+            <button id="btn-zoom-reset" class="btn-icon" title="Center View">⛶</button>
+          </div>
+        </div>
+
+        <!-- High-Performance Interactive HTML5 Canvas -->
+        <canvas id="mission-canvas"></canvas>
+
+        <!-- RescuePilot Tactical Agent Console (Strands Agents SDK HUD) -->
+        <div class="agent-command-console" id="agent-command-console">
+          <div class="agent-console-header">
+            <div class="agent-title-row">
+              <span class="agent-pulse-icon"></span>
+              <span class="agent-title">RESCUEPILOT AI MISSION COMMANDER</span>
+              <span class="agent-sdk-badge">POWERED BY STRANDS AGENTS SDK</span>
+            </div>
+            <div class="agent-header-controls">
+              <button class="btn-console-tool" id="btn-toggle-trace" title="Toggle Reasoning Trace View">
+                <span id="lbl-toggle-trace">COLLAPSE LOG</span> ▾
+              </button>
+            </div>
+          </div>
+
+          <!-- Natural Language Intent Bar -->
+          <div class="agent-input-container">
+            <div class="agent-input-wrapper">
+              <span class="agent-prompt-icon">⚡</span>
+              <input
+                type="text"
+                id="input-agent-prompt"
+                class="agent-text-input"
+                placeholder="Enter natural language mission intent (e.g. 'Deploy 4 drones to northern sector, storm approaching, prioritize survivors')..."
+              />
+              <button id="btn-agent-dispatch" class="btn-agent-submit">
+                <span>DISPATCH TO STRANDS AGENT</span> ➔
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Scenario Presets for Evaluator Demo -->
+          <div class="agent-presets-row">
+            <span class="presets-label">QUICK INTENT PRESETS:</span>
+            <button class="btn-preset" data-prompt="Deploy four drones to search the northern sector. Prioritize survivor detection. A storm is approaching.">
+              🚨 1. Sector SAR Sweep
+            </button>
+            <button class="btn-preset" data-prompt="Approaching severe storm with gale winds. Re-route swarm through sheltered valley corridor and contract formation.">
+              ⚡ 2. Storm Evasion
+            </button>
+            <button class="btn-preset" data-prompt="Heat signature spotted at Sector East (55, 42). Divert Bravo to hover-scan while swarm holds perimeter.">
+              🆘 3. Survivor Confirmation
+            </button>
+            <button class="btn-preset" data-prompt="Drone Charlie lost GPS lock. Safely land Charlie and rebalance remaining swarm in Wedge formation.">
+              ⚠️ 4. Honest Degradation (Fault)
+            </button>
+          </div>
+
+          <!-- Live Agent Multi-Tool Reasoning Stream Feed -->
+          <div class="agent-trace-container" id="agent-trace-container">
+            <div class="agent-trace-header">
+              <span>MODEL-DRIVEN REASONING & TOOL EXECUTION TRACE (LIVE)</span>
+              <span class="trace-counter" id="trace-event-count">0 EVENTS</span>
+            </div>
+            <div class="agent-trace-feed" id="agent-trace-feed">
+              <div class="trace-empty-hint">Waiting for operator command or closed-loop environmental telemetry trigger...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: Mission Intelligence & Controls -->
+      <aside class="sidebar control-sidebar">
+        <!-- Intelligent Formation Control -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <h2>FORMATION CONTROL</h2>
+            <label class="switch-toggle" title="AI Auto-Select Formation">
+              <input type="checkbox" id="chk-auto-formation" checked>
+              <span class="slider"></span>
+              <span class="switch-label">AI ADAPT</span>
+            </label>
+          </div>
+          <div class="formation-btn-group">
+            <button class="btn-formation active" data-formation="wedge">
+              <span class="f-icon">▲</span> WEDGE
+            </button>
+            <button class="btn-formation" data-formation="line">
+              <span class="f-icon">━</span> LINE
+            </button>
+            <button class="btn-formation" data-formation="arc">
+              <span class="f-icon">⌒</span> ARC
+            </button>
+            <button class="btn-formation" data-formation="diamond">
+              <span class="f-icon">◆</span> DIAMOND
+            </button>
+          </div>
+        </div>
+
+        <!-- Weather Simulation Station -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <h2>WEATHER & STORM SIM</h2>
+            <span class="badge" id="badge-storm-status">NORMAL</span>
+          </div>
+          <div class="control-row">
+            <div class="label-val-row">
+              <span class="control-label">WIND INTENSITY</span>
+              <span class="control-val font-mono" id="txt-wind-speed">4.5 m/s</span>
+            </div>
+            <input type="range" id="rng-wind" min="0" max="25" step="0.5" value="4.5" class="slider-range">
+          </div>
+          <div class="btn-row">
+            <button id="btn-inject-storm" class="btn btn-warning">
+              <span class="icon">⚡</span> INJECT GALE STORM
+            </button>
+            <button id="btn-clear-weather" class="btn btn-secondary">
+              <span class="icon">☀️</span> CLEAR
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Rescue Triage -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <h2>SAR VICTIM TRIAGE</h2>
+            <span class="badge badge-accent" id="badge-target-count">3 DETECTED</span>
+          </div>
+          <div class="target-list" id="target-list">
+            <!-- Dynamically Populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Failure Injection Matrix (Hackathon Proof of Resilience) -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <h2>FAULT INJECTION MATRIX</h2>
+          </div>
+          <div class="failure-btn-grid">
+            <button class="btn btn-danger-outline btn-sm" id="btn-fail-gps">
+              <span class="icon">📡</span> GPS LOSS
+            </button>
+            <button class="btn btn-danger-outline btn-sm" id="btn-fail-comms">
+              <span class="icon">📶</span> COMMS OUTAGE
+            </button>
+            <button class="btn btn-danger-outline btn-sm" id="btn-fail-battery">
+              <span class="icon">🪫</span> LOW BATTERY
+            </button>
+          </div>
+        </div>
+
+        <!-- Hardware & Autopilot Export -->
+        <div class="panel-box export-box">
+          <div class="panel-header">
+            <h2>HARDWARE EXPORT (MAVLink)</h2>
+          </div>
+          <p class="panel-desc">Export current autonomous flight plan directly to commercial autopilots & GCS.</p>
+          <div class="export-btn-group">
+            <a href="/api/export/qgc_plan" target="_blank" class="btn btn-download">
+              <span class="icon">📥</span> QGroundControl (.plan)
+            </a>
+            <a href="/api/export/waypoints" target="_blank" class="btn btn-download-alt">
+              <span class="icon">📋</span> Mission Planner (WPL 110)
+            </a>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Tactical SITREP Modal Dialog -->
+  <div id="modal-sitrep" class="modal-backdrop" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🚁</span>
+          <h2>RESCUEPILOT SITUATION REPORT (SITREP)</h2>
+        </div>
+        <button id="btn-close-sitrep" class="btn-icon-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <pre class="sitrep-pre font-mono" id="sitrep-content">Loading live SITREP from Strands Agent...</pre>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-copy-sitrep" class="btn btn-secondary">
+          <span class="icon">📋</span> COPY SITREP
+        </button>
+        <a href="/api/export/qgc_plan" target="_blank" class="btn btn-download">
+          <span class="icon">📥</span> DOWNLOAD QGROUNDCONTROL .PLAN
+        </a>
+        <a href="/api/export/waypoints" target="_blank" class="btn btn-download-alt">
+          <span class="icon">📥</span> DOWNLOAD MAVLINK WPL
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

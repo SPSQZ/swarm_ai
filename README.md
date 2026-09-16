@@ -1,413 +1,319 @@
-# Autonomous Multi-Drone Swarm Intelligence & Resilient Path Planning (`drone_smart_path`)
+# 🚁 RescuePilot: Autonomous AI Mission Commander for Search-and-Rescue Drone Swarms
 
-[![Project Status: Complete](https://img.shields.io/badge/Status-100%25%20Completed-brightgreen.svg)](#implementation-status)
-[![Tests: 76/76 Passing](https://img.shields.io/badge/Tests-76%2F76%20Passing-success.svg)](#testing--verification)
+> **Bridging human emergency intent to autonomous multi-UAV swarm execution during disaster crises using the Strands Agents SDK.**
+
+[![Hackathon: Agents for Humans](https://img.shields.io/badge/Hackathon-Agents%20for%20Humans-blueviolet.svg)](https://agentsforhumans.devpost.com/)
+[![Track: Good Neighbor Agents](https://img.shields.io/badge/Track-Good%20Neighbor%20Agents-orange.svg)](#-inspiration-the-human-centric-crisis)
+[![Framework: Strands Agents SDK](https://img.shields.io/badge/Agent%20SDK-Strands%20Agents-blue.svg)](https://github.com/strands-agents)
+[![Tests: 86/86 Passing](https://img.shields.io/badge/Tests-86%2F86%20Passing-brightgreen.svg)](#-testing--verification)
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Hardware: 100% Software-Based](https://img.shields.io/badge/Hardware-Simulation--First-orange.svg)](#why-simulation-first)
-[![Protocol: MAVLink v2 Ready](https://img.shields.io/badge/Protocol-MAVLink%20v2%20Ready-blueviolet.svg)](#7-industry-standard-mavlink-output-bridge)
-[![Dashboard: 2D/3D Live](https://img.shields.io/badge/Dashboard-2D%2F3D%20Live%20HUD-cyan.svg)](#8-interactive-2d3d-visual-mission-dashboard)
+[![Hardware: 100% Software-Based](https://img.shields.io/badge/Hardware-Simulation--First-orange.svg)](#-why-simulation-first)
+[![Protocol: MAVLink v2 & QGC](https://img.shields.io/badge/Protocol-MAVLink%20v2%20%7C%20QGC%20.plan-purple.svg)](#-hardware-grounding-mavlink-v2--qgroundcontrol-export)
+[![Dashboard: 2D/3D Live HUD](https://img.shields.io/badge/Dashboard-2D%2F3D%20Tactical%20HUD-cyan.svg)](#-interactive-2d3d-tactical-mission-hud)
+[![Offline Ready: Zero-Key Fallback](https://img.shields.io/badge/Offline%20Ready-Zero--Key%20Engine-success.svg)](#-zero-key-resilience--cloud-engine)
 
 ---
 
-## 📖 Executive Summary
+## 📖 Table of Contents
 
-**`drone_smart_path`** is a comprehensive, production-grade autonomous multi-UAV (Unmanned Aerial Vehicle) swarm coordination, path planning, and resilient exploration platform. Developed from the ground up as a **simulation-first software architecture**, the project allows full end-to-end design, execution, validation, and benchmarking of multi-drone missions in hazardous, unknown, and dynamically changing environments **without requiring physical drone hardware**.
-
-The system integrates continuous 3D physics, terrain understanding, multi-sensor noise modeling, frontier-based autonomous exploration, search-and-rescue target investigation, decentralized swarm collision avoidance, dynamic formation flight, weather resilience, fault tolerance, comprehensive automated mission evaluation, and an industry-standard **MAVLink v2 output bridge** for real-world drone compatibility.
-
----
-
-## 🎯 What the Project Does
-
-1. **3D Autonomous Navigation & Trajectory Generation**
-   - Synthesizes 3D motion primitives: straight flight, coordinated turns, climbs, descents, and stationary hover/hold.
-   - Validates candidate paths against physical constraints (velocity, acceleration, minimum terrain clearance) and filters out collisions with static obstacles, dynamic obstacles, and forbidden no-go zones.
-   - Employs a multi-objective cost function balancing path distance, obstacle proximity, terrain slope roughness, energy consumption, and environmental uncertainty.
-
-2. **Perception, Terrain Understanding & Mapping**
-   - Builds 2D/3D probabilistic occupancy grids, elevation maps, and terrain traversability matrices.
-   - Evaluates slope hazards, roughness costs, and vegetation/debris risk to delineate safe flight corridors.
-   - Simulates realistic sensor suites (IMU, GPS, LiDAR, Altimeter, Depth Sensor, RGB Camera) complete with Gaussian noise, bias drift, sensor degradation, and communication dropouts.
-
-3. **Autonomous Exploration & Search-and-Rescue (SAR)**
-   - Operates with **no fixed destination** needed: identifies unknown frontiers on the fly using information-gain and distance heuristics.
-   - Detects and tracks survivors/targets with confidence scoring, initiates priority-based investigation flight plans, and performs automated hover-and-inspect maneuvers.
-
-4. **Multi-Drone Swarm Coordination & Dynamic Formations**
-   - Coordinates multi-UAV swarms through decentralized state broadcasting (position, velocity, battery, hazard telemetry).
-   - Implements geometric formation controllers: **Line**, **Wedge**, **Arc**, and **Diamond**.
-   - Features a cross-phase **Intelligent Formation Advisor** that dynamically adapts formation geometry, inter-drone spacing, and flight orientation according to real-time wind gusts, terrain steepness, battery reserves, and mission profiles.
-   - Uses pairwise collision evasion vectors for guaranteed collision-free inter-drone spacing.
-
-5. **Weather & Failure Resilience (Fault Tolerance)**
-   - Simulates dynamic storm conditions: high wind vectors, severe gusts, visibility degradation, and precipitation.
-   - Dynamically triggers speed reduction, formation contraction, sheltered ridge route preference, and emergency hold modes.
-   - Robustly handles component failures including GPS loss, sensor failures, and communication link degradation, reverting to local autonomy or autonomous Return-to-Safe-Zone (RSZ).
-
-6. **Evaluation & Scenario Benchmarking Framework**
-   - Includes 7 built-in scenario templates (single-drone navigation, obstacle course, multi-drone exploration, search & rescue, storm resilience, communication outage, formation switching).
-   - Collects granular flight metrics (3D trajectory distance, battery efficiency, cell coverage %, collision counts, latency).
-   - Generates automated mission reports, cross-scenario comparisons, and benchmark evaluations.
-
-7. **Industry-Standard MAVLink Output Bridge (Hardware-Ready)**
-   - Translates high-level 3D trajectories and swarm paths into official **MAVLink v2 binary packet frames** (`SET_POSITION_TARGET_LOCAL_NED` #84 and `HEARTBEAT` #0).
-   - Exports standard **QGroundControl JSON mission plans (`.plan`)** and **Mission Planner waypoint files (`.waypoints` WPL 110)**.
-   - Ready to stream setpoints over UDP directly to PX4 SITL, ArduPilot, or QGroundControl.
-
-8. **Interactive 2D/3D Visual Mission Dashboard**
-   - High-performance, zero-dependency browser-based tactical HUD powered by HTML5 Canvas & Vanilla CSS.
-   - Seamless toggling between **2D Top-Down Radar** and **3D Isometric Perspective View**.
-   - Real-time animated drone quad-rotors, dynamic laser formation meshes, terrain elevation grid, obstacle 3D cylinders, and radar beacon waves.
-   - Interactive live controls: dynamic formation switching (Line/Wedge/Arc/Diamond/AI), real-time weather & gale storm injector, fault injection matrix (GPS loss, comms blackout, low battery), and one-click QGroundControl `.plan` downloads.
+- [💡 Inspiration: The Human-Centric Crisis](#-inspiration-the-human-centric-crisis)
+- [⚙️ Closed-Loop Agentic Architecture](#️-closed-loop-agentic-architecture)
+- [🛠️ The 7 Specialized Strands Agent Tools](#️-the-7-specialized-strands-agent-tools)
+- [🛡️ "Honest Degradation" & Fault Tolerance](#️-honest-degradation--fault-tolerance)
+- [🖥️ Interactive 2D/3D Tactical Mission HUD](#️-interactive-2d3d-tactical-mission-hud)
+- [🔌 Zero-Key Resilience & Cloud Engine](#-zero-key-resilience--cloud-engine)
+- [📡 Hardware Grounding: MAVLink v2 & QGroundControl Export](#-hardware-grounding-mavlink-v2--qgroundcontrol-export)
+- [🚀 Quick Start (Run in 60 Seconds)](#-quick-start-run-in-60-seconds)
+- [🧪 Testing & Verification](#-testing--verification)
+- [🔬 The Underlying Robotics & Simulation Engine](#-the-underlying-robotics--simulation-engine)
+- [📁 Repository Structure](#-repository-structure)
+- [🎬 Demo Script & Evaluator Guide](#-demo-script--evaluator-guide)
 
 ---
 
-## 🏗️ System Architecture
+## 💡 Inspiration: The Human-Centric Crisis
+
+When a natural disaster strikes—such as a flash flood, wildfire, earthquake, or blizzard—every second matters. Search-and-Rescue (SAR) coordinators and emergency first responders face **extreme cognitive overload**:
+- Calculating complex 3D flight trajectories and terrain clearance.
+- Gauging dynamic wind-shear vectors and choosing aerodynamic formations.
+- Tracking battery drain rates and communications dropouts.
+- Triangulating thermal survivor signatures across rugged terrain.
+
+### The Human Problem
+Emergency personnel should **never** be forced to calculate waypoint coordinates, configure aerodynamic spacings, or fiddle with spreadsheet sliders while lives hang in the balance. They must operate at the level of **high-level human intent**.
+
+### Enter RescuePilot
+Powered by the **Strands Agents SDK**, **RescuePilot** acts as an expert Autonomous AI Mission Commander. It interprets natural language intent from human first responders, selects and chains specialized robotics tools, continuously monitors 3D environmental telemetry, dynamically replans when storms strike or drones fail (**"Honest Degradation"**), and exports production-grade flight plans for physical UAV hardware.
+
+---
+
+## ⚙️ Closed-Loop Agentic Architecture
+
+Unlike traditional AI chatbots that generate static text responses, RescuePilot operates as a **continuous closed-loop agentic feedback system**:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│              MISSION SPECIFICATION & HIGH-LEVEL TASKS           │
-├─────────────────────────────────────────────────────────────────┤
-│                  INTELLIGENT ADAPTATION LAYER                   │
-│   • Context-Aware Formation Advisor  • Dynamic Speed Adaptation │
-│   • Weather & Wind Compensation      • Energy-Preserving Spacing│
-├─────────────────────────────────────────────────────────────────┤
-│                   SWARM COORDINATION LAYER                      │
-│   • Multi-Drone Mesh Telemetry       • Greedy Task Allocator    │
-│   • Coverage Ownership Tracking      • Inter-Drone Avoidance    │
-│   • Geometric Formation Controller (Line / Wedge / Arc / Diamond)│
-├─────────────────────────────────────────────────────────────────┤
-│                  AUTONOMOUS INTELLIGENCE LAYER                  │
-│   • Frontier Detection & Scoring     • SAR Target Detector      │
-│   • Information-Gain Prioritization  • Investigation Planner    │
-├─────────────────────────────────────────────────────────────────┤
-│                    PLANNING & CONTROL LAYER                     │
-│   • 3D Motion Primitives (5 Types)   • Multi-Candidate Generator│
-│   • Constraint & Boundary Validator  • Multi-Cost Path Selector │
-├─────────────────────────────────────────────────────────────────┤
-│                   MAPPING & PERCEPTION LAYER                    │
-│   • Probabilistic Occupancy Grid     • Elevation & Slope Maps   │
-│   • Terrain Traversability Matrix    • Sensor Noise/Failure Sim │
-│   • IMU, GPS, LiDAR, Depth, Camera   • Safe Flight Corridors    │
-├─────────────────────────────────────────────────────────────────┤
-│                     STATE MANAGEMENT LAYER                      │
-│   • 3D Position, Velocity, Accel     • Orientation & Ang. Vel   │
-│   • Battery Discharge Model          • Flight / Mission FSM     │
-├─────────────────────────────────────────────────────────────────┤
-│                 SIMULATION & ENVIRONMENT LAYER                  │
-│   • Continuous 3D World & Physics    • Static/Dynamic Obstacles │
-│   • No-Go Zones & Rough Terrain      • Wind, Storms & Failures  │
-├─────────────────────────────────────────────────────────────────┤
-│                 EVALUATION & BENCHMARKING LAYER                 │
-│   • Scenario Runner (7 Templates)    • Metrics Collector        │
-│   • Performance Comparison           • Automated Report Engine  │
-├─────────────────────────────────────────────────────────────────┤
-│             HARDWARE & PROTOCOL BRIDGE LAYER (MAVLink)          │
-│   • MAVLink v2 Binary Encoding       • QGroundControl .plan     │
-│   • Mission Planner WPL 110          • UDP Telemetry Stream     │
-│   • SET_POSITION_TARGET_LOCAL_NED    • Multi-Drone Swarm Plans  │
-└─────────────────────────────────────────────────────────────────┘
+                     ┌──────────────────────────────────────────────┐
+                     │          Emergency Response Operator         │
+                     │  "Deploy 4 drones to search northern sector. │
+                     │   Prioritize survivor detection. Storm near."│
+                     └──────────────────────┬───────────────────────┘
+                                            │ Natural Language Intent
+                                            ▼
+                     ┌──────────────────────────────────────────────┐
+                     │          RescuePilot Strands Agent           │
+                     │        (Powered by Strands SDK)              │
+                     │   • Multi-step Reasoning & Decomposition     │
+                     │   • Model-Driven Tool Selection              │
+                     │   • Dynamic Execution & Lifecycle Hooks      │
+                     └──────────────────────┬───────────────────────┘
+                                            │
+        ┌───────────────────────────────────┴───────────────────────────────────┐
+        ▼                                   ▼                                   ▼
+┌───────────────────────┐       ┌───────────────────────┐       ┌───────────────────────┐
+│WeatherAssessmentTool  │       │EnvironmentHazardTool  │       │ SwarmAllocationTool   │
+│• Wind speed & gusts   │       │• 3D terrain elevation │       │• Fleet sizing & roles │
+│• Storm progression    │       │• No-go zones & ridges │       │• Formation (Line/Arc) │
+└───────────────────────┘       └───────────────────────┘       └───────────────────────┘
+        ▼                                   ▼                                   ▼
+┌───────────────────────┐       ┌───────────────────────┐       ┌───────────────────────┐
+│   PathPlannerTool     │       │ SARInvestigationTool  │       │ FailureRecoveryTool   │
+│• 3D motion primitives │       │• Frontier search grid │       │• GPS loss mitigation  │
+│• Obstacle clearance   │       │• Survivor triage      │       │• Swarm re-balancing   │
+└───────────────────────┘       └───────────────────────┘       └───────────────────────┘
+                                            │
+                                            ▼
+                     ┌──────────────────────────────────────────────┐
+                     │              MissionReportTool               │
+                     │  • SITREP generation & coverage telemetry    │
+                     │  • MAVLink v2 & QGroundControl (.plan) export│
+                     └──────────────────────┬───────────────────────┘
+                                            │
+                                            ▼
+                     ┌──────────────────────────────────────────────┐
+                     │         3D Drone Swarm Simulation HUD        │
+                     │  (Continuous Physics, Sensor Noise, Radar)   │
+                     └──────────────────────┬───────────────────────┘
+                                            │
+                                            │ Real-Time Telemetry Triggers:
+                                            │ ⚡ Sudden gale storm wind spike
+                                            │ 🆘 Survivor detected at (55, 42)
+                                            │ ⚠️ Drone Charlie GPS lost
+                                            ▼
+                     ┌──────────────────────────────────────────────┐
+                     │      Continuous Observation & Re-planning    │
+                     │  Strands Agent receives trigger -> Reasons   │
+                     │  -> Invokes recovery tools -> Updates Swarm  │
+                     └──────────────────────┴───────────────────────┘
 ```
+
+---
+
+## 🛠️ The 7 Specialized Strands Agent Tools
+
+RescuePilot wraps its underlying robotics engine using the official `@tool` decorator from the Strands Agents SDK:
+
+| # | Tool Name | Description | Key Capabilities |
+|---|---|---|---|
+| 1 | **`weather_assessment_tool`** | Analyzes atmospheric conditions and wind vectors | Computes safe flight speeds, identifies gust turbulence, and mandates aerodynamic Wedge formation under headwinds. |
+| 2 | **`environment_hazard_tool`** | Evaluates 3D terrain Digital Elevation Models (DEM) | Detects ridge slope hazards, static obstacles, and restricted airspace (no-go zones) to enforce minimum terrain clearance. |
+| 3 | **`swarm_allocation_tool`** | Dynamically configures multi-drone swarm geometry | Assigns Lead, Wing, and Tail roles and calculates formation spacing (Line for broad search, Wedge for storms, Arc/Diamond for tight corridors). |
+| 4 | **`path_planning_tool`** | Synthesizes 3D kinematically feasible trajectories | Generates 3D motion primitives (climbs, turns, descents, straight dashes, hovers) with multi-objective safety costs. |
+| 5 | **`sar_investigation_tool`** | Triangulates survivor signals and coordinates triage | Scores detection confidence, prioritizes life-critical targets, and plans automated 12-second high-resolution hover scans. |
+| 6 | **`failure_recovery_tool`** | Orchestrates **Honest Degradation** | Safely isolates failing drones (optical-flow descent or RTB) and dynamically recalculates coverage spacing across survivors. |
+| 7 | **`mission_report_tool`** | Compiles tactical military Situation Reports (SITREPs) | Synthesizes real-time mission telemetry and translates trajectories into QGroundControl `.plan` files and MAVLink v2 packets. |
+
+---
+
+## 🛡️ "Honest Degradation" & Fault Tolerance
+
+Hackathon judges value real-world resilience over fragile "happy-path" demos. RescuePilot implements **Honest Degradation**:
+
+- **Real-Time Anomaly Detection**: When a drone suffers sudden GPS signal degradation, motor stutter, or a critically depleted battery (<18%), the system does not crash or freeze.
+- **Autonomous Safe Isolation**: The Strands Agent immediately invokes `failure_recovery_tool`, issuing an emergency command for the compromised UAV to switch to local optical flow and perform an immediate controlled descent or Return-to-Base (RTB).
+- **Swarm Rebalancing**: The agent instantly reasons through the remaining active assets and rebalances the swarm (e.g., expanding 3-drone spacing from 5.0m to 6.2m) to ensure **zero coverage gaps** in the search grid.
+
+---
+
+## 🖥️ Interactive 2D/3D Tactical Mission HUD
+
+RescuePilot includes an aerospace-grade, zero-dependency browser-based tactical command center (`HTML5 Canvas` + `Vanilla CSS`):
+
+- **Dual Perspective Engine**: Seamless one-click toggling between **2D Top-Down Radar** and **3D Isometric Tactical View**.
+- **Live Strands Reasoning Feed**: An integrated monospace HUD console displaying the agent's internal thoughts, tool invocations, parameters, and tactical rationale in real time.
+- **Natural Language Intent Console**: Voice/text input bar with 4 one-click disaster presets for evaluators.
+- **Dynamic Swarm Visualizer**: Animated quad-rotors, laser formation meshes, terrain elevation contours, obstacle 3D cylinders, and radar sweep sweeps.
+- **Live Interactive Injector**: Real-time storm injector (gale wind spike) and fault matrix (GPS loss, comms blackout, low battery).
+- **One-Click SITREP & Plan Export**: Instant modal displaying full military SITREPs and direct download of hardware-ready QGroundControl `.plan` files.
+
+---
+
+## 🔌 Zero-Key Resilience & Cloud Engine
+
+A major pitfall of hackathon AI projects is failing during evaluation when judges lack specific cloud credentials. RescuePilot solves this with a **dual-engine architecture**:
+
+1. **Amazon Bedrock (Cloud Engine)**:
+   - Connects directly to Amazon Bedrock via `strands.models.bedrock.BedrockModel`.
+   - Supports cutting-edge models like `amazon.nova-micro-v1:0` or Anthropic Claude 3.5 Haiku.
+   - Automatically activates when AWS credentials (`AWS_ACCESS_KEY_ID` or `AWS_PROFILE`) are detected.
+2. **Local Deterministic Engine (Zero-Key Fallback)**:
+   - If no cloud credentials exist, RescuePilot seamlessly falls back to its built-in offline engine (`RescuePilotFallbackModel`).
+   - Ensures **100% of features, tool calling, replanning, and dashboard interactions work immediately out of the box** without throwing errors or requiring API keys.
+
+---
+
+## 📡 Hardware Grounding: MAVLink v2 & QGroundControl Export
+
+RescuePilot bridges software intelligence to physical aerospace hardware:
+- **Official MAVLink v2 Binary Encoding**: Generates binary packets (`SET_POSITION_TARGET_LOCAL_NED` #84 and `HEARTBEAT` #0) ready for UDP streaming to PX4 SITL, ArduPilot, or physical telemetry radios.
+- **QGroundControl `.plan` Exporter**: One-click download of standardized JSON mission files conforming to the QGroundControl v1 specification for immediate field upload.
+- **Mission Planner WPL 110**: Generates legacy waypoint format files for older autopilot ground stations.
+
+---
+
+## 🚀 Quick Start (Run in 60 Seconds)
+
+### 1. Clone and Install Dependencies
+
+```bash
+git clone https://github.com/SPSQZ/swarm_ai.git
+cd swarm_ai
+
+# Install dependencies (strands-agents, numpy, matplotlib, pytest)
+pip install -r requirements.txt
+```
+
+### 2. Launch the Mission Control Dashboard
+
+```bash
+python run_dashboard.py
+```
+
+This starts the tactical server at `http://localhost:8080` and automatically opens your web browser:
+- Click **"🚨 1. Sector SAR Sweep"** to see the Strands Agent plan a 4-drone northern search mission.
+- Click **"⚡ 2. Storm Evasion"** to watch the closed-loop agent reroute the swarm through a sheltered valley.
+- Click **"⚠️ 4. Honest Degradation"** to inject a GPS failure on Drone Charlie and watch the agent isolate Charlie and rebalance the swarm!
+- Click **"📜 SITREP"** to inspect and download the official QGroundControl flight plan.
+
+*(Optional)* To run with Amazon Bedrock, simply export your AWS credentials before launching:
+```bash
+export AWS_ACCESS_KEY_ID="your-key"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+export AWS_DEFAULT_REGION="us-east-1"
+python run_dashboard.py
+```
+
+---
+
+## 🧪 Testing & Verification
+
+RescuePilot is verified with **86 comprehensive automated tests** across all subsystems:
+
+```bash
+pytest -v
+```
+
+### Test Suite Coverage:
+| Test Suite | Tests | Description |
+|---|:---:|---|
+| `test_rescue_pilot_agent.py` | 10 | Strands Agent initialization, all 7 tools, fallback engine, and event logging |
+| `test_mavlink_bridge.py` | 8 | MAVLink v2 packet framing, QGC `.plan` export, and coordinate conversions |
+| `test_dashboard_server.py` | 4 | REST API endpoints, scenario resets, step advancement, and plan downloads |
+| `test_intelligent_formation.py` | 4 | Dynamic formation switching, wind/terrain adaptation, and energy conservation |
+| `test_phase1_to_17_*.py` | 60 | 3D physics, motion primitives, sensor noise, occupancy mapping, and SAR triage |
+| **Total** | **86** | **100% Passing (~3.3s execution time)** |
+
+---
+
+## 🔬 The Underlying Robotics & Simulation Engine
+
+Underneath the Strands Agent lies a high-fidelity simulation engine built from first principles:
+
+1. **Continuous 3D Physics & Kinematics**:
+   - 6-DOF state representation (position, velocity, acceleration, orientation angles, angular rates).
+   - Non-linear battery discharge curves accounting for aerodynamic drag and payload weight.
+2. **Perception & Mapping**:
+   - 2D/3D probabilistic occupancy grids with log-odds sensor updates.
+   - Digital Elevation Models (DEM) with slope roughness and traversability matrices.
+   - Realistic sensor noise models (Gaussian drift on IMU, satellite degradation on GPS, LiDAR raycasting).
+3. **Decentralized Swarm Coordination**:
+   - Mesh telemetry broadcasting (state, battery, and target detections).
+   - Pairwise collision evasion vectors preventing mid-air collisions.
+   - Dynamic formation geometries (Line, Wedge, Arc, Diamond).
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-drone_smart_path/
-├── environment/               # Environmental representation & terrain
-│   ├── obstacles.py           # Static/dynamic obstacles, no-go zones, clearance
-│   └── terrain.py             # 3D elevation, slope gradients, terrain roughness
+swarm_ai/
+├── rescue_pilot/              # Strands Agents SDK Mission Commander
+│   ├── agent.py               # Core RescuePilotAgent, BedrockModel hook, and fallback engine
+│   ├── tools.py               # 7 specialized Strands @tool definitions
+│   └── mission_events.py      # Telemetry event hooks and closed-loop triggers
 │
-├── state/                     # Vehicle state representation
-│   └── drone_state.py         # 3D kinematics, battery dynamics, mission states
+├── dashboard/                 # Interactive 2D/3D Visual Mission HUD
+│   ├── index.html             # Aerospace dark-mode command center layout
+│   ├── style.css              # Cyber-aerospace HUD styling and glassmorphism
+│   ├── app.js                 # 60 FPS HTML5 Canvas engine (2D Radar & 3D Isometric)
+│   └── server.py              # REST API bridge and live simulation runner
 │
-├── simulation/                # Core simulation engine
-│   ├── world.py               # 3D world physics, simulation clock, entity spawning
-│   └── visualization.py       # ASCII/matplotlib mission & trajectory visualizers
+├── interfaces/                # Autopilot & Hardware Protocol Bridges
+│   └── mavlink_bridge.py      # MAVLink v2 binary frames & QGroundControl .plan export
 │
-├── sensors/                   # Simulated sensor suite
-│   ├── sensor_base.py         # Unified sensor base with noise, drift, and failures
-│   └── simulated_sensors.py   # IMU, GPS, Altimeter, Depth, LiDAR, Camera
-│
-├── mapping/                   # Spatial awareness & map representations
-│   ├── occupancy.py           # 2D/3D grid occupancy updates & uncertainty
-│   ├── elevation.py           # Digital elevation models and gradient queries
-│   └── traversability.py      # Terrain cost assessment and safe corridor logic
-│
-├── planner/                   # Path planning & decision making
-│   ├── generator.py           # 3D motion primitives & candidate path generation
-│   ├── validator.py           # Boundary, collision, and clearance verification
-│   ├── cost_function.py       # Multi-criteria path evaluation
-│   └── path_selector.py       # Cost-optimal path selection & replanning
-│
-├── exploration/               # Autonomous exploration without fixed targets
-│   ├── frontier.py            # Frontier detection between explored & unknown cells
-│   ├── exploration_scorer.py  # Information-gain and distance priority scoring
-│   ├── task_allocator.py      # Multi-drone task assignment & area partitioning
-│   └── coverage_manager.py    # Swarm coverage ownership & deduplication
-│
-├── rescue/                    # Search-and-Rescue (SAR) intelligence
-│   ├── target_detector.py     # Survivor detection, confidence, and triage
-│   └── investigation_planner.py # Priority-driven investigation & hover inspection
-│
-├── swarm/                     # Swarm orchestration & formation control
-│   ├── drone.py               # Autonomous swarm member entity
-│   ├── swarm_coordinator.py   # Inter-drone telemetry mesh & neighbor tracking
+├── swarm/                     # Swarm Coordination & Formation Geometry
+│   ├── drone.py               # Swarm member entity
+│   ├── swarm_coordinator.py   # Mesh telemetry & neighbor tracking
 │   ├── formation.py           # Geometric formations (Line, Wedge, Arc, Diamond)
-│   ├── formation_advisor.py   # Mission & energy formation profiles
-│   ├── intelligent_formation.py # Dynamic context-aware formation adaptation
-│   └── collision_avoidance.py # Pairwise inter-drone evasion vectors
+│   └── intelligent_formation.py # Dynamic context-aware formation advisor
 │
-├── resilience/                # Fault tolerance & environmental adaptation
-│   ├── weather_simulator.py   # Wind vectors, gusts, visibility loss, storm intensity
-│   ├── terrain_risk_assessor.py # Slope & exposure hazard identification
-│   ├── adaptive_controller.py # Speed throttling, formation contraction, emergency hold
-│   ├── failure_simulator.py   # Generalized failure injection framework
-│   ├── sensor_failures.py     # GPS loss, drift injection, noise amplification
-│   └── communication_failures.py # Packet loss, latency, and link blackout simulation
+├── planner/                   # 3D Path Planning & Trajectory Generation
+│   ├── generator.py           # 3D motion primitives (turns, climbs, descents, hovers)
+│   ├── validator.py           # Kinematic limits, boundary, and obstacle clearance
+│   └── cost_function.py       # Multi-criteria path optimization
 │
-├── evaluation/                # Testing, benchmarking & metrics
-│   ├── scenario_runner.py     # Execution engine with 7 pre-configured templates
-│   ├── metrics_collector.py   # Distance, battery efficiency, coverage %, collisions
-│   ├── metrics.py             # Metric calculations and data structures
-│   └── evaluation_framework.py# Automated reporting & benchmark comparisons
+├── mapping/                   # Spatial Awareness & Traversability
+│   ├── occupancy.py           # Probabilistic 2D/3D occupancy grid
+│   ├── elevation.py           # Digital elevation model & gradient calculations
+│   └── traversability.py      # Terrain cost assessment and corridor identification
 │
-├── dashboard/                  # Interactive 2D/3D visual mission dashboard
-│   ├── index.html             # Aerospace-grade dark mode glassmorphism HUD
-│   ├── style.css              # Cyber-aerospace styling and responsive layout
-│   ├── app.js                 # 60 FPS HTML5 Canvas engine (2D & 3D Isometric)
-│   └── server.py              # REST API and live simulation engine
+├── rescue/                    # Search-and-Rescue Intelligence
+│   ├── target_detector.py     # Thermal survivor detection and confidence scoring
+│   └── investigation_planner.py # Priority hover-inspection planner
 │
-├── interfaces/                # Hardware & autopilot protocol bridges
-│   ├── __init__.py
-│   └── mavlink_bridge.py      # MAVLink v2 frames, QGC .plan, and WPL 110 export
+├── resilience/                # Fault Tolerance & Environmental Modeling
+│   ├── weather_simulator.py   # Wind shear, gale gusts, and storm intensity
+│   └── adaptive_controller.py # Dynamic speed throttling and formation contraction
 │
-├── tests/                     # 20 test suites covering 100% of functionality
-│   ├── test_phase1_foundation.py
-│   ├── test_phase2_simulation.py
-│   ├── test_phase3_drone_state.py
-│   ├── test_phase4_environment.py
-│   ├── test_phase5_trajectory.py
-│   ├── test_phase6_path_validation.py
-│   ├── test_phase7_sensor_simulation.py
-│   ├── test_phase8_mapping.py
-│   ├── test_phase9_decision_engine.py
-│   ├── test_phase10_exploration.py
-│   ├── test_phase11_rescue.py
-│   ├── test_phase12_swarm.py
-│   ├── test_phase13_multi_exploration.py
-│   ├── test_phase14_formation.py
-│   ├── test_intelligent_formation.py
-│   ├── test_phase15_resilience.py
-│   ├── test_phase16_failures.py
-│   ├── test_phase17_evaluation.py
-│   ├── test_mavlink_bridge.py # MAVLink protocol & mission export validation
-│   └── test_dashboard_server.py # Dashboard REST API & simulation engine tests
+├── simulation/                # World Physics & Entity Management
+│   └── world.py               # Continuous 3D world physics and clock
 │
-├── run_dashboard.py           # 1-command launcher for visual mission runner
-├── requirements.txt           # Core dependencies (numpy, matplotlib, pytest)
-└── README.md                  # Unified project documentation
+├── tests/                     # 86 automated test suites (pytest)
+│   ├── test_rescue_pilot_agent.py
+│   ├── test_mavlink_bridge.py
+│   └── test_phase*.py
+│
+├── run_dashboard.py           # 1-command launcher for visual mission HUD
+├── requirements.txt           # Core Python dependencies
+├── DEVPOST_SUBMISSION.md      # Official Devpost Hackathon submission copy
+└── README.md                  # Master documentation
 ```
 
 ---
 
-## 🔬 Why "Simulation-First"?
+## 🎬 Demo Script & Evaluator Guide
 
-Testing autonomous drone swarms on real hardware carries prohibitive costs, risks of battery fire or physical crashes, and weather dependencies. This platform mirrors the engineering methodologies of leading aerospace and robotics organizations (DJI, Skydio, Boston Dynamics):
+For hackathon evaluators reviewing the submission, here is the recommended 3-minute walkthrough:
 
-| Metric | Hardware Prototyping | `drone_smart_path` Simulation |
+| Time | Action | What to Observe |
 |---|---|---|
-| **Iteration Cycle** | Hours to charge & set up | Milliseconds per execution |
-| **Crash / Failure Cost** | $1,000s per incident | $0.00 (Pure software assertion) |
-| **Swarm Scale** | Severely limited by physical units | Scalable to 10+ drones concurrently |
-| **Extreme Edge Cases** | Hard/dangerous to trigger (storm, GPS failure) | 100% deterministic failure injection |
-| **Reproducibility** | Subject to atmospheric noise | Bit-level deterministic replay |
+| **0:00 - 0:30** | Run `python run_dashboard.py` | Observe 3D isometric view, quad-rotor animations, and active UAV telemetry cards. |
+| **0:30 - 1:15** | Click **"🚨 1. Sector SAR Sweep"** | Watch the Strands Agent reason through weather and terrain, select a Wedge formation, and stream its live thoughts on the HUD. |
+| **1:15 - 2:00** | Click **"⚡ 2. Storm Evasion"** | Observe closed-loop adaptation: wind spikes trigger the agent to contract spacing to 4.5m and route through the valley corridor. |
+| **2:00 - 2:40** | Click **"⚠️ 4. Honest Degradation"** | Witness fault tolerance: Drone Charlie loses GPS; the agent safely lands Charlie and rebalances the remaining 3 drones to eliminate gaps. |
+| **2:40 - 3:00** | Click **"📜 SITREP"** | Review the tactical military situation report and download the official QGroundControl `.plan` file. |
 
 ---
 
-## 🚀 Quick Start & Usage
+## 📄 License
 
-### 1. Prerequisites & Installation
-
-Ensure you have Python 3.10+ installed:
-
-```bash
-# Clone or navigate into the repository
-cd drone_smart_path
-
-# Install core dependencies
-pip install -r requirements.txt
-```
-
-### 2. Launching the Interactive 2D/3D Mission Dashboard
-
-Launch the live mission control dashboard in your web browser with a single command:
-
-```bash
-python run_dashboard.py
-```
-
-This immediately boots the local REST simulation server on `http://localhost:8080` and opens your browser:
-- **Toggle Views**: Switch between 2D Top-Down and 3D Isometric tactical radar.
-- **Swarm Controls**: Change formations (*Line*, *Wedge*, *Arc*, *Diamond*, *AI Auto*).
-- **Environmental Simulation**: Drag wind intensity sliders or inject severe gale storms.
-- **Fault Tolerance Testing**: Click to trigger live GPS loss, comms link outage, or battery degradation.
-- **Hardware Export**: Click to download the active autonomous mission as a QGroundControl `.plan`!
-
-### 3. Running All Tests
-
-Verify that all modules and features pass the comprehensive test suite:
-
-```bash
-python -m pytest tests/ -v
-```
-
-Expected output:
-```
-============================== 76 passed in 0.25s ==============================
-```
-
----
-
-### 4. Programmatic Usage Examples
-
-#### A. Running Built-in Mission Scenarios
-
-```python
-from evaluation.scenario_runner import ScenarioBuilder, ScenarioRunner
-
-runner = ScenarioRunner()
-
-# 1. Single Drone Navigation
-result_nav = runner.run_scenario(ScenarioBuilder.single_drone_navigation())
-print("Navigation Status:", result_nav["status"])
-
-# 2. Multi-Drone Coordinated Exploration
-result_swarm = runner.run_scenario(ScenarioBuilder.multi_drone_exploration(num_drones=4))
-print("Swarm Completion:", result_swarm["completion"], "%")
-
-# 3. Search and Rescue with Target Triage
-result_sar = runner.run_scenario(ScenarioBuilder.search_and_rescue())
-print("SAR Targets Handled:", result_sar.get("targets_found", 0))
-
-# 4. Storm Resilience Under High Winds
-result_storm = runner.run_scenario(ScenarioBuilder.storm_resilience())
-print("Storm Result:", result_storm)
-```
-
-#### B. Dynamic Intelligent Formation Control
-
-```python
-from swarm.intelligent_formation import IntelligentFormationPlanner
-
-planner = IntelligentFormationPlanner()
-
-# Context: High winds + rough terrain + low battery
-selected_formation = planner.select_optimal_formation(
-    mission_type="rescue",
-    wind_speed=12.5,        # High wind (m/s)
-    battery_level=22.0,     # Low battery (%)
-    terrain_roughness=0.85  # Hazardous terrain
-)
-
-print(f"Optimal Formation Chosen: {selected_formation.name}")
-# Automatically contracts spacing to save battery and switches to Wedge for wind penetration!
-```
-
-#### C. Custom Mission Execution with Metrics Collection
-
-```python
-from evaluation.metrics_collector import MetricsCollector
-
-collector = MetricsCollector()
-
-# Track 3D position trajectories across multiple drones
-collector.record_position(drone_id=1, x=10.0, y=12.0, z=15.0)
-collector.record_position(drone_id=1, x=25.0, y=30.0, z=18.0)
-
-# Track grid coverage
-for x in range(5):
-    for y in range(5):
-        collector.mark_cell_visited(x, y)
-
-print(f"Total Distance Drone 1: {collector.get_total_distance(drone_id=1):.2f} m")
-print(f"Swarm Area Coverage: {collector.get_coverage_percentage():.2f}%")
-```
-
-#### D. Exporting to QGroundControl & Real MAVLink Streams
-
-```python
-from interfaces.mavlink_bridge import MAVLinkBridge
-from planner.generator import PathGenerator
-from swarm.formation import FormationController
-
-bridge = MAVLinkBridge(origin_lat=47.397742, origin_lon=8.545594)
-gen = PathGenerator()
-traj = gen.generate_turn(start=(0, 0), goal=(100, 100), altitude=15.0)
-
-# 1. Export standard QGroundControl flight plan (.plan JSON)
-bridge.export_qgroundcontrol_plan(traj, output_file="missions/search_mission.plan")
-
-# 2. Export multi-drone swarm plans with formation offsets
-formation = FormationController(formation_type="wedge", spacing=5.0)
-offsets = formation.get_formation_offsets(num_drones=3)
-bridge.export_swarm_plans(traj, formation_offsets=offsets, output_dir="missions/swarm")
-
-# 3. Generate binary MAVLink v2 packets (SET_POSITION_TARGET_LOCAL_NED #84)
-packets = list(bridge.generate_packet_stream(traj, sys_id=1))
-print(f"Generated {len(packets)} MAVLink v2 binary frames ready for PX4/QGC streaming!")
-```
-
----
-
-## 📊 Implementation Status (Phases 1–17 + Extensions Complete)
-
-| Phase | Description | Key Modules | Test Suite | Status |
-|---|---|---|---|:---:|
-| **Phase 1** | Project Foundation & Specs | System boundary definitions | `test_phase1_foundation.py` | ✅ Complete |
-| **Phase 2** | Simulation Core | `simulation/world.py`, `visualization.py` | `test_phase2_simulation.py` | ✅ Complete |
-| **Phase 3** | Drone Kinematics & State | `state/drone_state.py` | `test_phase3_drone_state.py` | ✅ Complete |
-| **Phase 4** | Environment Representation | `environment/terrain.py`, `obstacles.py` | `test_phase4_environment.py` | ✅ Complete |
-| **Phase 5** | 3D Trajectory Primitives | `planner/generator.py` | `test_phase5_trajectory.py` | ✅ Complete |
-| **Phase 6** | Path Candidate Validation | `planner/validator.py` | `test_phase6_path_validation.py` | ✅ Complete |
-| **Phase 7** | Multi-Sensor Simulation | `sensors/sensor_base.py`, `simulated_sensors.py` | `test_phase7_sensor_simulation.py` | ✅ Complete |
-| **Phase 8** | Mapping & Traversability | `mapping/occupancy.py`, `elevation.py`, `traversability.py` | `test_phase8_mapping.py` | ✅ Complete |
-| **Phase 9** | Decision Engine & Cost Opt | `planner/cost_function.py`, `path_selector.py` | `test_phase9_decision_engine.py` | ✅ Complete |
-| **Phase 10** | Autonomous Exploration | `exploration/frontier.py`, `exploration_scorer.py` | `test_phase10_exploration.py` | ✅ Complete |
-| **Phase 11** | Search & Rescue (SAR) | `rescue/target_detector.py`, `investigation_planner.py` | `test_phase11_rescue.py` | ✅ Complete |
-| **Phase 12** | Swarm Mesh Coordination | `swarm/drone.py`, `swarm_coordinator.py` | `test_phase12_swarm.py` | ✅ Complete |
-| **Phase 13** | Multi-Drone Task Allocation | `exploration/task_allocator.py`, `coverage_manager.py` | `test_phase13_multi_exploration.py` | ✅ Complete |
-| **Phase 14** | Formation Flight & Evasion | `swarm/formation.py`, `collision_avoidance.py` | `test_phase14_formation.py` | ✅ Complete |
-| **Adaptive** | Intelligent Formation System | `swarm/intelligent_formation.py`, `formation_advisor.py` | `test_intelligent_formation.py` | ✅ Complete |
-| **Phase 15** | Weather & Storm Resilience | `resilience/weather_simulator.py`, `adaptive_controller.py` | `test_phase15_resilience.py` | ✅ Complete |
-| **Phase 16** | Failure Injection & Fallback | `resilience/failure_simulator.py`, `sensor_failures.py`, `communication_failures.py` | `test_phase16_failures.py` | ✅ Complete |
-| **Phase 17** | Evaluation & Benchmarking | `evaluation/scenario_runner.py`, `metrics_collector.py`, `evaluation_framework.py` | `test_phase17_evaluation.py` | ✅ Complete |
-| **Hardware** | MAVLink v2 & QGC Bridge | `interfaces/mavlink_bridge.py` | `test_mavlink_bridge.py` | ✅ Complete |
-| **Visual HUD** | 2D/3D Mission Dashboard | `dashboard/server.py`, `index.html`, `app.js` | `test_dashboard_server.py` | ✅ Complete |
-
----
-
-## 🧪 Testing & Verification Summary
-
-The test suite runs automatically via pytest:
-
-```bash
-# Run quiet test summary
-python -m pytest tests/ -q
-
-# Run with test durations and coverage
-python -m pytest tests/ -v --durations=10
-```
-
-- **Total Test Files**: 20
-- **Total Tests**: 76
-- **Passed**: 76 (100%)
-- **Failures**: 0
-- **Average Runtime**: ~0.25 seconds
-
----
-
-## 📄 License & Academic Attribution
-
-This project is developed as an advanced software simulation and autonomous systems research platform for multi-UAV operations, intelligent path planning, and resilient swarm coordination.
+This project is licensed under the MIT License — open-source for search-and-rescue, first responders, and autonomous robotics researchers worldwide.

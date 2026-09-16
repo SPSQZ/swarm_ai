@@ -1,5 +1,15 @@
-# Core Python dependencies for the project prototype
+# RescuePilot: Core & Agent Dependencies
+# Autonomous AI Mission Commander for Search-and-Rescue Drone Swarms
 
-numpy
-matplotlib
-pytest
+# Strands Agents SDK (Core Agentic Orchestration & @tool interfaces)
+strands-agents>=1.0.0
+
+# Cloud Model Engine (Optional for Amazon Bedrock; zero-key fallback works offline)
+boto3>=1.30.0
+
+# Core Scientific & Robotics Simulation
+numpy>=1.24.0
+matplotlib>=3.7.0
+
+# Automated Verification & Testing
+pytest>=7.4.0

@@ -1,4 +1,7 @@
-"""One-command runner for the Drone Smart Path Mission Dashboard.
+"""One-command runner for RescuePilot Mission Control Dashboard.
+
+RescuePilot: Autonomous AI Mission Commander for Search-and-Rescue Drone Swarms
+Powered by the Strands Agents SDK.
 
 Usage:
     python run_dashboard.py
@@ -12,25 +15,26 @@ from dashboard.server import run_dashboard_server
 
 
 def main():
-    print("=" * 70)
-    print("🚁 DRONE SMART PATH — MISSION CONTROL DASHBOARD")
-    print("=" * 70)
+    print("=" * 75)
+    print("🚁 RESCUEPILOT — AUTONOMOUS AI MISSION COMMANDER (STRANDS AGENTS SDK)")
+    print("   Good Neighbor Agents | Search & Rescue Multi-UAV Swarm Intelligence")
+    print("=" * 75)
 
     try:
         server, port = run_dashboard_server(port=8080)
         url = f"http://localhost:{port}"
-        print(f"✅ Dashboard Server active at: {url}")
+        print(f"✅ RescuePilot Tactical HUD active at: {url}")
         print("💡 Opening browser automatically...")
-        print("Press Ctrl+C to stop the dashboard server.\n")
+        print("Press Ctrl+C to stop the mission server.\n")
 
         # Open web browser after a short delay
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
 
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n🛑 Dashboard server stopped gracefully.")
+        print("\n🛑 RescuePilot Mission server stopped gracefully.")
     except Exception as e:
-        print(f"\n❌ Error launching dashboard: {e}")
+        print(f"\n❌ Error launching RescuePilot dashboard: {e}")
         sys.exit(1)
 
 
